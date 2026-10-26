@@ -47,3 +47,4 @@ jobs:
           name: MMM-Mad-Mob-Mayhem
           path: source/build/libs/*.jar
           if-no-files-found: error
+          
