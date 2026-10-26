@@ -1,0 +1,49 @@
+
+name: Build MMM Mod
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "*.zip"
+      - ".github/workflows/build.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar archivos
+        uses: actions/checkout@v4
+
+      - name: Preparar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.8"
+
+      - name: Extraer el proyecto MMM
+        run: |
+          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" -print -quit)
+          if [ -z "$ZIP_FILE" ]; then
+            echo "No se encontró el ZIP del proyecto MMM"
+            exit 1
+          fi
+          mkdir source
+          unzip -q "$ZIP_FILE" -d source
+
+      - name: Compilar el mod
+        working-directory: source
+        run: gradle build --no-daemon
+
+      - name: Guardar el archivo JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: MMM-Mad-Mob-Mayhem
+          path: source/build/libs/*.jar
+          if-no-files-found: error
